@@ -5,7 +5,7 @@
 	st  = status --short --branch
 	lg = log --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
 [core]
-	editor = nano --wait
+	editor = nano
 [pull]
 	rebase = false
 [column]
