@@ -89,7 +89,7 @@ chmod 700 ~/.local/share/history
 git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.local/lib/zsh/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/lib/zsh/zsh-autosuggestions
 git clone https://github.com/jimhester/per-directory-history ~/.local/lib/zsh/per-directory-history
-curl -o ~/.zshrc https://raw.githubusercontent.com/evgenygorchakov/environment/main/zshrc
+curl -o ~/.zshrc https://raw.githubusercontent.com/evgenygorchakov/env/main/.zshrc
 chsh -s /bin/zsh
 ```
 
