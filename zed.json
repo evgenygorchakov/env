@@ -1,7 +1,18 @@
 {
+  "cli_default_open_behavior": "existing_window",
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
   "auto_install_extensions": {
     "adwaita-pastel": true,
-    "material-icon-theme": true
+    "material-icon-theme": true,
+    "emmet": true,
+    "html": true,
+    "scss": true,
+    "twig": true,
+    "vue": true
   },
   "outline_panel": {
     "dock": "left"
@@ -46,6 +57,7 @@
     "XML": ["svg"],
     "YAML": ["**/*.bu"],
     "JSON": ["**/*.webmanifest"],
+    "CSS": ["**/*.styl"]
   },
   "prettier": {
     "allowed": true,
@@ -54,17 +66,17 @@
     "Vue.js": {
       "format_on_save": "off",
       "prettier": { "allowed": false },
-      "formatter": { "code_actions": { "source.fixAll.eslint": true } }
+      "formatter": { "code_action": "source.fixAll.eslint" }
     },
     "JavaScript": {
       "format_on_save": "on",
       "prettier": { "allowed": false },
-      "formatter": { "code_actions": { "source.fixAll.eslint": true } }
+      "formatter": { "code_action": "source.fixAll.eslint" }
     },
     "TypeScript": {
       "format_on_save": "on",
       "prettier": { "allowed": false },
-      "formatter": { "code_actions": { "source.fixAll.eslint": true } }
+      "formatter": { "code_action": "source.fixAll.eslint" }
     }
   },
   "edit_predictions": {

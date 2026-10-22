@@ -32,8 +32,17 @@ sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/t
 sudo dnf swap ffmpeg-free ffmpeg --allowerasing
 sudo dnf copr enable dusansimic/themes
 sudo dnf copr enable hyperreal/better_fonts
-sudo dnf install xclip micro fuse-encfs zenity borgbackup openssl ffmpegthumbnailer nss-tools mosquitto ydotool amrnb amrwb faac faad2 flac gstreamer1-plugin-libav gstreamer1-plugins-bad-freeworld gstreamer1-plugins-bad-free gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-ugly gstreamer1-plugins-ugly-free lame libdca libmad libmatroska x264 x265 xvidcore mpv ffmpeg ffmpeg-libs libheif-freeworld libheif-tools libva libva-utils mozilla-openh264 unrar 7zip speech-dispatcher speech-dispatcher-utils google-chrome-stable nodejs podman podman-compose git tig ripgrep xkill bat make difftastic zsh starship eza atuin sqlite morewaita-icon-theme nethogs fuse-sshfs logiops libgda libgda-sqlite playerctl cabextract xorg-x11-font-utils tesseract tesseract-devel tesseract-langpack-rus gdisk zbar zed
+sudo dnf install xclip micro fuse-encfs zenity borgbackup openssl ffmpegthumbnailer nss-tools ydotool amrnb amrwb faac faad2 flac gstreamer1-plugin-libav gstreamer1-plugins-bad-freeworld gstreamer1-plugins-bad-free gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-ugly gstreamer1-plugins-ugly-free lame libdca libmad libmatroska x264 x265 xvidcore mpv ffmpeg ffmpeg-libs libheif-freeworld libheif-tools libva libva-utils mozilla-openh264 unrar 7zip speech-dispatcher speech-dispatcher-utils google-chrome-stable nodejs podman podman-compose git gh tig ripgrep xkill bat make gcc-c++ difftastic zsh starship eza atuin sqlite morewaita-icon-theme nethogs fuse-sshfs libgda libgda-sqlite playerctl cabextract xorg-x11-font-utils tesseract tesseract-devel tesseract-langpack-rus gdisk zbar zed ddcutil headsetcontrol gnome-shell-extension-appindicator
 sudo rpm -ivh --nodigest --nofiledigest https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+```
+
+Install Docker:
+
+```sh
+sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
 ```
 
 Set Flatpak languages:
@@ -60,7 +69,7 @@ Disable Software auto-update and notifications.
 Disable file system scanning:
 
 ```sh
-dconf write /org/freedesktop/tracker/miner/files/crawling-interval -2
+gsettings set org.freedesktop.Tracker3.Miner.Files crawling-interval -2
 ```
 
 ### Keyboard
@@ -90,7 +99,17 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.local/lib/zsh/
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/lib/zsh/zsh-autosuggestions
 git clone https://github.com/jimhester/per-directory-history ~/.local/lib/zsh/per-directory-history
 curl -o ~/.zshrc https://raw.githubusercontent.com/evgenygorchakov/env/main/.zshrc
+curl -o ~/.config/starship.toml https://raw.githubusercontent.com/evgenygorchakov/env/main/starship.toml
 chsh -s /bin/zsh
+```
+
+Install Git config and global ignore:
+
+```sh
+curl -o ~/.gitconfig https://raw.githubusercontent.com/evgenygorchakov/env/main/.gitconfig
+mkdir -p ~/.config/git
+curl -o ~/.config/git/ignore https://raw.githubusercontent.com/evgenygorchakov/env/main/gitignore
+gh auth login
 ```
 
 Import old bash history to atuin:
@@ -109,6 +128,13 @@ Install Claude Code:
 
 ```sh
 curl -fsSL https://claude.ai/install.sh | bash
+```
+
+Install Zed config:
+
+```sh
+mkdir -p ~/.config/zed
+curl -o ~/.config/zed/settings.json https://raw.githubusercontent.com/evgenygorchakov/env/main/zed.json
 ```
 
 Reboot.
@@ -136,4 +162,21 @@ Add icon theme:
 
 ```sh
 gsettings set org.gnome.desktop.interface icon-theme 'MoreWaita'
+```
+
+Show minimize and maximize buttons:
+
+```sh
+gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
+```
+
+Take screenshots by `Print` in Gradia (system screenshot UI moves to `Shift + Super + S`):
+
+```sh
+gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Shift><Super>s']"
+KEY=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia/
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$KEY']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY name 'Gradia screenshot'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY command 'flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY binding 'Print'
 ```

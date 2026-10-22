@@ -4,4 +4,7 @@ my home [installation process](./install.md)
 
 * [GNOME Shell extensions](./GNOME.md)
 * [`.gitconfig`](./.gitconfig)
+* [`~/.config/git/ignore`](./gitignore)
 * [`.zshrc`](./.zshrc)
+* [`starship.toml`](./starship.toml)
+* [Zed `settings.json`](./zed.json)

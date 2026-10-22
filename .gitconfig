@@ -4,6 +4,9 @@
 [alias]
 	st  = status --short --branch
 	lg = log --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
+	dft = -c diff.external=difft diff
+	dlog = -c diff.external=difft log -p --ext-diff
+	dshow = -c diff.external=difft show --ext-diff
 [core]
 	editor = nano
 [pull]
