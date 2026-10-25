@@ -66,6 +66,16 @@ sudo systemctl disable NetworkManager-wait-online.service
 
 Disable Software auto-update and notifications.
 
+Install `system-update` script (DNF, Flatpak, GNOME extensions,
+firmware check) and its `Обновление системы` launcher, then pin it to the dock:
+
+```sh
+mkdir -p ~/.local/bin ~/.local/share/applications
+curl -o ~/.local/bin/system-update https://raw.githubusercontent.com/evgenygorchakov/env/main/system-update
+chmod +x ~/.local/bin/system-update
+curl -o ~/.local/share/applications/system-update.desktop https://raw.githubusercontent.com/evgenygorchakov/env/main/system-update.desktop
+```
+
 Disable file system scanning:
 
 ```sh

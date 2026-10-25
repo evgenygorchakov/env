@@ -1,0 +1,24 @@
+#!/bin/zsh
+
+set -e
+
+TITLE='\033[0;32m\033[1m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+echo -e "${TITLE}Обновление системы${NC}"
+pkexec dnf upgrade --refresh -y
+
+echo -e "\n${TITLE}Обновление приложений из Flatpak${NC}"
+flatpak update -y
+
+echo -e "\n${TITLE}Обновление расширений GNOME${GRAY}"
+gdbus call --session --dest org.gnome.Shell.Extensions \
+     --object-path /org/gnome/Shell/Extensions \
+     --method org.gnome.Shell.Extensions.CheckForUpdates
+
+echo -e "\n${TITLE}Проверка обновлений прошивок${NC}"
+fwupdmgr get-updates || true
+
+echo -e "\n${TITLE}Готово${NC}"
+read

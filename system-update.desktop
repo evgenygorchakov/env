@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Обновление системы
+Comment=Update RPM, Flatpak, and GNOME extensions
+Icon=system-software-update
+Exec=flatpak run app.devsuite.Ptyxis -- /home/evgn/.local/bin/system-update
