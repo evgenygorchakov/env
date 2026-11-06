@@ -55,7 +55,7 @@ sudo flatpak update
 Install applications from Flatpak:
 
 ```sh
-flatpak install flathub de.haeckerfelix.Fragments org.telegram.desktop org.nickvision.tubeconverter org.gnome.Loupe com.mattjakeman.ExtensionManager io.gitlab.adhami3310.Converter net.nokyan.Resources org.gnome.Calculator org.gnome.Logs org.gnome.Weather org.gnome.clocks org.gnome.Calendar org.gnome.Epiphany org.inkscape.Inkscape org.gnome.gitlab.YaLTeR.VideoTrimmer org.gnome.World.Iotas app.devsuite.Ptyxis hu.irl.cameractrls org.gnome.Snapshot org.gnome.Papers org.gimp.GIMP be.alexandervanhee.gradia com.github.PintaProject.Pinta org.gnome.font-viewer
+flatpak install flathub de.haeckerfelix.Fragments org.telegram.desktop org.nickvision.tubeconverter org.gnome.Loupe com.mattjakeman.ExtensionManager io.gitlab.adhami3310.Converter net.nokyan.Resources org.gnome.Calculator org.gnome.Logs org.gnome.Weather org.gnome.clocks org.gnome.Calendar org.gnome.Epiphany org.inkscape.Inkscape org.gnome.gitlab.YaLTeR.VideoTrimmer org.gnome.World.Iotas app.devsuite.Ptyxis hu.irl.cameractrls org.gnome.Snapshot org.gnome.Papers be.alexandervanhee.gradia com.github.PintaProject.Pinta org.gnome.font-viewer
 ```
 
 Speed-up boot:
@@ -180,13 +180,22 @@ Show minimize and maximize buttons:
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 ```
 
-Take screenshots by `Print` in Gradia (system screenshot UI moves to `Shift + Super + S`):
+Take screenshots in Gradia: `Print` and `Shift + Super + S` select an area,
+`Shift + Print` captures the full screen (`Alt + Print` stays the system window screenshot):
 
 ```sh
-gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Shift><Super>s']"
-KEY=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gradia/
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$KEY']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY name 'Gradia screenshot'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY command 'flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY binding 'Print'
+gsettings set org.gnome.shell.keybindings show-screenshot-ui "[]"
+gsettings set org.gnome.shell.keybindings screenshot "[]"
+DIR=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
+SCHEMA=org.gnome.settings-daemon.plugins.media-keys.custom-keybinding
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$DIR/gradia/', '$DIR/gradia-area/', '$DIR/gradia-full/']"
+gsettings set $SCHEMA:$DIR/gradia/ name 'Gradia screenshot'
+gsettings set $SCHEMA:$DIR/gradia/ command 'flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE'
+gsettings set $SCHEMA:$DIR/gradia/ binding 'Print'
+gsettings set $SCHEMA:$DIR/gradia-area/ name 'Gradia screenshot (Shift+Super+S)'
+gsettings set $SCHEMA:$DIR/gradia-area/ command 'flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE'
+gsettings set $SCHEMA:$DIR/gradia-area/ binding '<Shift><Super>s'
+gsettings set $SCHEMA:$DIR/gradia-full/ name 'Gradia full screen screenshot'
+gsettings set $SCHEMA:$DIR/gradia-full/ command 'flatpak run be.alexandervanhee.gradia --screenshot=FULL'
+gsettings set $SCHEMA:$DIR/gradia-full/ binding '<Shift>Print'
 ```
