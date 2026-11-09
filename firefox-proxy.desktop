@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Firefox (прокси)
+Comment=Firefox profile "proxy": all traffic through Privoxy 127.0.0.1:8120
+Icon=firefox
+Exec=env MOZ_APP_REMOTINGNAME=firefox-proxy firefox -P proxy %u
+StartupWMClass=firefox-proxy
+StartupNotify=true
+Terminal=false
+Categories=Network;WebBrowser;
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=Open a New Window
+Exec=env MOZ_APP_REMOTINGNAME=firefox-proxy firefox -P proxy --new-window %u
+
+[Desktop Action new-private-window]
+Name=Open a New Private Window
+Exec=env MOZ_APP_REMOTINGNAME=firefox-proxy firefox -P proxy --private-window %u
