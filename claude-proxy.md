@@ -1,10 +1,11 @@
 ## Claude Code through a proxy
 
-Claude Code always goes through an upstream proxy, with no direct fallback. Firefox sends only Claude sites through the same proxy.
+Claude Code always goes through an upstream proxy, with no direct fallback. Firefox sends only Claude sites through the same proxy. A separate Firefox profile, `proxy`, sends all its traffic through it.
 
 ```
 Claude Code ──────────────────────────┐
-Firefox (Claude sites only, via PAC) ─┴─> Privoxy 127.0.0.1:8120 ─> SOCKS5 upstream (user/pass) ─> internet
+Firefox (Claude sites only, via PAC) ─┼─> Privoxy 127.0.0.1:8120 ─> SOCKS5 upstream (user/pass) ─> internet
+Firefox profile "proxy" (all sites) ──┘
 
 OpenSnitch: the Claude Code process may only connect to loopback (i.e. Privoxy)
 ```
@@ -32,10 +33,11 @@ The packaged system service (`privoxy.service`, port 8118) stays disabled — a 
 
 ```
 confdir /home/evgn/.config/privoxy
+templdir /etc/privoxy/templates
 listen-address 127.0.0.1:8120
 
-# Upstream: SOCKS5 with auth; DNS is resolved by the proxy (socks5t)
-forward-socks5t / PROXY_USER:PROXY_PASS@PROXY_HOST:PROXY_SOCKS_PORT .
+# Upstream: SOCKS5 with auth; DNS is resolved by the proxy
+forward-socks5 / PROXY_USER:PROXY_PASS@PROXY_HOST:PROXY_SOCKS_PORT .
 
 # Forward only, no filtering
 toggle 0
@@ -46,6 +48,9 @@ enable-remote-http-toggle 0
 # Long streaming API responses
 socket-timeout 600
 keep-alive-timeout 60
+
+# A whole browser profile goes through here; the default 128 runs out
+max-client-connections 512
 
 # Log startup, warnings and errors to the journal
 debug 4096
@@ -67,10 +72,13 @@ After=network-online.target
 ExecStart=/usr/sbin/privoxy --no-daemon %h/.config/privoxy/config
 Restart=always
 RestartSec=3
+LimitNOFILE=4096
 
 [Install]
 WantedBy=default.target
 ```
+
+`templdir` points at the packaged error pages, so a failed request shows Privoxy's error page instead of an empty response. `LimitNOFILE` is needed for `max-client-connections 512`: each connection takes two file descriptors (client and upstream), and the default soft limit is 1024. When the limit is hit, Privoxy rejects everyone, Claude Code included. The journal then shows `Maximum number of connections reached`.
 
 ```sh
 systemctl --user daemon-reload
@@ -212,9 +220,55 @@ Caveats:
 * While `user.js` exists, manual proxy changes in Firefox settings are reverted on restart.
 * Chrome is not configured.
 
+### 5. Firefox: a separate profile with all traffic through the proxy
+
+For the occasional case when other sites, not just Claude, should go through the proxy. A separate profile rather than a toggle in the main one: the main profile's Claude-only setup stays untouched, the windows can't be confused, and cookies and logins don't mix between the real IP and the proxy IP.
+
+```sh
+firefox -CreateProfile proxy   # creates ~/.config/mozilla/firefox/<id>.proxy; the default profile doesn't change
+```
+
+`user.js` in the new profile directory:
+
+```js
+user_pref("network.proxy.type", 1);
+user_pref("network.proxy.http", "127.0.0.1");
+user_pref("network.proxy.http_port", 8120);
+user_pref("network.proxy.ssl", "127.0.0.1");
+user_pref("network.proxy.ssl_port", 8120);
+// Don't go direct if the proxy is down
+user_pref("network.proxy.failover_direct", false);
+// WebRTC only through the proxy (no direct UDP)
+user_pref("media.peerconnection.ice.proxy_only_if_behind_proxy", true);
+// No DNS prefetch: the proxy resolves names, the local DNS doesn't see them
+user_pref("network.dns.disablePrefetch", true);
+```
+
+Optional, so its windows stand out: before the first start, create `prefs.js` in the profile directory with a different theme. Unlike `user.js`, it can be changed later in the UI.
+
+```js
+user_pref("extensions.activeThemeID", "firefox-alpenglow@mozilla.org");
+```
+
+Launcher, [`firefox-proxy.desktop`](firefox-proxy.desktop):
+
+```sh
+curl -o ~/.local/share/applications/firefox-proxy.desktop https://raw.githubusercontent.com/evgenygorchakov/env/main/firefox-proxy.desktop
+```
+
+`MOZ_APP_REMOTINGNAME=firefox-proxy` in its `Exec` gives the profile its own Wayland app_id. The profile gets its own dock icon, and links opened from other apps still go to the main profile. The launcher has no `MimeType`, so it never becomes a link handler.
+
+Check: in "Firefox (прокси)", https://ipinfo.io/json must show the proxy's IP. In the main Firefox it must show the usual one.
+
+Notes:
+
+* Bookmarks, logins and extensions are separate per profile.
+* If Privoxy is down, pages in this profile don't open (no direct fallback).
+* Some Russian sites drop part of the connections from the proxy's foreign IP. For example, https://ip.platipomiru.com/ (Yandex Cloud) times out about every other attempt, even straight through the upstream SOCKS without Privoxy. Open such sites in the main profile.
+
 ### Change the proxy
 
-Edit the `forward-socks5t` line in `~/.config/privoxy/config`, then:
+Edit the `forward-socks5` line in `~/.config/privoxy/config`, then:
 
 ```sh
 systemctl --user restart privoxy-claude
@@ -244,7 +298,8 @@ sudo tail -n 50 /var/log/opensnitchd.log
    sudo dnf remove privoxy
    ```
 3. Firefox: delete `user.js` from the profile and `~/.config/privoxy/claude.pac`. In Settings → Network Settings, pick "No proxy", then restart Firefox.
-4. OpenSnitch:
+4. Firefox profile `proxy`: `rm ~/.local/share/applications/firefox-proxy.desktop`, then remove the profile in `about:profiles` (Remove → Delete Files).
+5. OpenSnitch:
    ```sh
    sudo rm /etc/opensnitchd/rules/00?-claude-*.json
    sudo systemctl disable --now opensnitchd
